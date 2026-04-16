@@ -53,5 +53,6 @@ function buildFallbackMock(c: Case): AnalysisResult {
     assignment_recommendation: `Currently assigned to ${c.assigned_to.replace(/_/g, ' ')}.`,
     priority: 'low',
     flags: ['⚠ Analysis server not running — responses are mocked'],
+    _isMock: true,
   }
 }

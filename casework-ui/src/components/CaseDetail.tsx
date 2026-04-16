@@ -465,14 +465,17 @@ function AnalysisTab({
 
   return (
     <div className="max-w-2xl">
-      {/* Mock disclaimer */}
-      <div className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 flex items-start gap-2">
-        <span className="flex-shrink-0 mt-0.5">ℹ</span>
-        <span>
-          <strong>Mocked response</strong> — This analysis was returned by a pre-written mock endpoint at{' '}
-          <code className="bg-amber-100 px-1 rounded">localhost:8000/analyse</code>. In production, a live language model would generate these results.
-        </span>
-      </div>
+      {/* Mock disclaimer — only shown when server is unreachable and fallback was used */}
+      {result._isMock && (
+        <div className="mb-4 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 flex items-start gap-2">
+          <span className="flex-shrink-0 mt-0.5">ℹ</span>
+          <span>
+            <strong>Server offline</strong> — Could not reach{' '}
+            <code className="bg-amber-100 px-1 rounded">localhost:8000</code>. Start the AI server with{' '}
+            <code className="bg-amber-100 px-1 rounded">npm run server</code> to get a real Claude-generated analysis.
+          </span>
+        </div>
+      )}
 
       {/* Priority + policy match */}
       <div className="grid grid-cols-2 gap-3 mb-4">

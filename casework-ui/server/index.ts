@@ -78,7 +78,8 @@ app.post('/analyse', async (req, res) => {
   const stream = anthropic.messages.stream({
     model,
     max_tokens: 4096,
-    thinking: { type: 'adaptive' },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    thinking: { type: 'adaptive' } as any,
     system: buildSystemPrompt(),
     messages: [
       {
@@ -105,7 +106,7 @@ app.post('/analyse', async (req, res) => {
   }
 
   // Parse the JSON Claude returned
-  const jsonMatch = textBlock.text.match(/\{[\s\S]*\}/)
+  const jsonMatch = textBlock.text.match(/\{[\s\S]*}/)
   if (!jsonMatch) {
     console.error('[Parse error] Raw Claude output:', textBlock.text)
     res.status(502).json({ error: 'Could not parse JSON from Claude response.' })

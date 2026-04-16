@@ -69,4 +69,5 @@ export interface AnalysisResult {
   priority: Priority
   summary: string
   flags: string[]
+  _isMock?: boolean
 }
