@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case Detail — Casework Assistant</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <header class="govuk-header">
+    <div class="govuk-header__container">
+      <a href="/" class="govuk-header__title">Casework Assistant</a>
+      <span class="govuk-header__user">Sarah Chen</span>
+    </div>
+  </header>
+
+  <main class="govuk-main">
+    <!-- Case header -->
+    <div class="case-header">
+      <a href="/" class="case-header__back">&#8592; Back to queue</a>
+      <h1 id="case-title" class="case-header__title">Loading...</h1>
+      <p id="case-subtitle" class="case-header__subtitle"></p>
+      <div id="case-flags" class="case-header__flags"></div>
+    </div>
+
+    <!-- Two-column grid -->
+    <div class="case-grid">
+      <!-- LEFT COLUMN -->
+      <div>
+        <!-- AI Summary -->
+        <div class="panel" style="margin-bottom: 20px;">
+          <h2 class="panel__title">Summary <span class="ai-badge">AI</span></h2>
+          <div id="summary-content">
+            <div class="skeleton">
+              <div class="skeleton__bar skeleton__bar--long"></div>
+              <div class="skeleton__bar skeleton__bar--medium"></div>
+              <div class="skeleton__bar skeleton__bar--short"></div>
+              <div style="margin-top: 8px; font-size: 13px;">Generating summary...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="panel" style="margin-bottom: 20px;">
+          <h2 class="panel__title">Timeline</h2>
+          <ul id="timeline-content" class="timeline"></ul>
+        </div>
+
+        <!-- Case notes -->
+        <div class="panel">
+          <h2 class="panel__title">Case Notes</h2>
+          <div id="notes-content" class="case-notes"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div>
+        <!-- Policy panel -->
+        <div class="panel" style="margin-bottom: 20px;">
+          <h2 class="panel__title">Relevant Policy</h2>
+          <div id="policy-content"></div>
+        </div>
+
+        <!-- AI Observations -->
+        <div class="panel">
+          <h2 class="panel__title">AI Observations <span class="ai-badge">AI</span></h2>
+          <div id="observations-content">
+            <div class="skeleton">
+              <div class="skeleton__bar skeleton__bar--long"></div>
+              <div class="skeleton__bar skeleton__bar--medium"></div>
+              <div style="margin-top: 8px; font-size: 13px;">Analysing case notes...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions section (full width) -->
+    <div class="actions-section">
+      <h2 class="actions-section__title">Actions Ready for Approval</h2>
+      <div id="actions-content">
+        <div class="skeleton">
+          <div class="skeleton__bar skeleton__bar--medium"></div>
+          <div style="margin-top: 8px; font-size: 13px;">Preparing drafts...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Confirm popover (hidden by default) -->
+  <div id="confirm-popover" class="confirm-popover" style="display: none;">
+    <div class="confirm-popover__content">
+      <h3 id="confirm-title" class="confirm-popover__title"></h3>
+      <p id="confirm-text" class="confirm-popover__text"></p>
+      <div class="confirm-popover__buttons">
+        <button id="confirm-cancel" class="btn btn--secondary">Cancel</button>
+        <button id="confirm-ok" class="btn btn--green">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/case.js"></script>
+</body>
+</html>

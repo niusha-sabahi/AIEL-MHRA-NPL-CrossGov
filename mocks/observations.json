@@ -1,0 +1,187 @@
+{
+  "CASE-2026-00042": [
+    {
+      "text": "Partial evidence only — proof of address received but income statement still outstanding after 91 days",
+      "severity": "high",
+      "source": "timeline[2].note"
+    },
+    {
+      "text": "Applicant mentioned employer has been contacted — delay may be external and outside applicant's direct control",
+      "severity": "info",
+      "source": "case_notes"
+    },
+    {
+      "text": "Previous claim REF-55102 referenced — may warrant cross-check to ensure no duplication or overpayment",
+      "severity": "low",
+      "source": "case_notes"
+    },
+    {
+      "text": "Case has passed both reminder (28 days) and escalation (56 days) thresholds without resolution",
+      "severity": "high",
+      "source": "timeline"
+    }
+  ],
+  "CASE-2026-00091": [
+    {
+      "text": "Applicant has held a personal licence for 4 years with no incidents — strong compliance history",
+      "severity": "info",
+      "source": "case_notes"
+    },
+    {
+      "text": "Inspection passed with no concerns noted — clean report supports straightforward approval",
+      "severity": "info",
+      "source": "timeline[2].note"
+    },
+    {
+      "text": "Festival capacity of 500 — confirm public liability insurance meets the £2 million threshold per POL-LA-001",
+      "severity": "low",
+      "source": "case_notes"
+    }
+  ],
+  "CASE-2026-00107": [
+    {
+      "text": "Two distinct regulatory breaches identified: unqualified staff and record-keeping failures spanning 6 months",
+      "severity": "high",
+      "source": "case_notes"
+    },
+    {
+      "text": "Legal team has been copied in — enforcement proceedings may already be under consideration",
+      "severity": "medium",
+      "source": "case_notes"
+    },
+    {
+      "text": "Partial documentation received on 20 February — staff qualification records were incomplete even before the site visit",
+      "severity": "medium",
+      "source": "timeline[2].note"
+    },
+    {
+      "text": "Breaches involve both personnel qualifications and administrative processes — may indicate systemic compliance issues",
+      "severity": "high",
+      "source": "case_notes"
+    }
+  ],
+  "CASE-2026-00133": [
+    {
+      "text": "Change from full-time to part-time (22 hours/week) — straightforward trigger with clear evidence",
+      "severity": "info",
+      "source": "case_notes"
+    },
+    {
+      "text": "All three evidence documents received and verified promptly (within 14 days of request)",
+      "severity": "info",
+      "source": "timeline[2].note"
+    },
+    {
+      "text": "Income below threshold — entitlement increase likely. Check if increase exceeds £50/week requiring team leader sign-off per POL-BR-004",
+      "severity": "low",
+      "source": "case_notes"
+    }
+  ],
+  "CASE-2026-00158": [
+    {
+      "text": "Annual reassessment — routine trigger, no concerns flagged",
+      "severity": "info",
+      "source": "case_notes"
+    },
+    {
+      "text": "Evidence request sent 42 days ago — approaching but has now passed the 28-day reminder threshold",
+      "severity": "medium",
+      "source": "timeline[1].note"
+    },
+    {
+      "text": "Medical certificate requested — may take longer if applicant needs to arrange a GP appointment",
+      "severity": "info",
+      "source": "case_notes"
+    }
+  ],
+  "CASE-2026-00172": [
+    {
+      "text": "Renewal of existing licence with clean 5-year history — low-risk case",
+      "severity": "info",
+      "source": "case_notes"
+    },
+    {
+      "text": "No objections received during consultation period — no complicating factors",
+      "severity": "info",
+      "source": "timeline[1].note"
+    }
+  ],
+  "CASE-2026-00199": [
+    {
+      "text": "Routine scheduled check — organisation has clean previous inspection history (18 months ago)",
+      "severity": "info",
+      "source": "case_notes"
+    },
+    {
+      "text": "Evidence request sent 29 days ago — the 28-day response window has just elapsed",
+      "severity": "medium",
+      "source": "timeline[1].note"
+    },
+    {
+      "text": "Evidence sent by both email and recorded post — dual notification provides good audit trail",
+      "severity": "info",
+      "source": "case_notes"
+    }
+  ],
+  "CASE-2026-00214": [
+    {
+      "text": "Evidence outstanding for over 150 days despite two reminder letters — all standard escalation steps exhausted",
+      "severity": "high",
+      "source": "case_notes"
+    },
+    {
+      "text": "Telephone number on record appears incorrect — applicant may not be receiving communications",
+      "severity": "high",
+      "source": "case_notes"
+    },
+    {
+      "text": "Case has been in escalation since 20 January (87 days) without resolution — may require alternative contact methods or home visit",
+      "severity": "high",
+      "source": "timeline"
+    },
+    {
+      "text": "Change of address was the original trigger — if applicant has moved, registered address for letters may also be outdated",
+      "severity": "medium",
+      "source": "case_notes"
+    }
+  ],
+  "CASE-2026-00231": [
+    {
+      "text": "Two objections received — per POL-LA-003, case must be referred to senior caseworker before decision",
+      "severity": "medium",
+      "source": "case_notes"
+    },
+    {
+      "text": "Both objections relate to noise impact — applicant has already submitted an updated noise management plan in response",
+      "severity": "info",
+      "source": "case_notes"
+    },
+    {
+      "text": "Outdoor venue increases noise risk compared to enclosed premises — objections may carry weight",
+      "severity": "low",
+      "source": "case_notes"
+    }
+  ],
+  "CASE-2026-00248": [
+    {
+      "text": "Triggered by anonymous whistleblower report — allegations of inadequate health and safety practices at two sites",
+      "severity": "medium",
+      "source": "case_notes"
+    },
+    {
+      "text": "Documentation largely compliant but one gap noted: no incident log entries for 6 weeks in autumn 2025",
+      "severity": "medium",
+      "source": "case_notes"
+    },
+    {
+      "text": "Organisation has been asked for clarification on the gap — response pending",
+      "severity": "info",
+      "source": "case_notes"
+    },
+    {
+      "text": "Whistleblower allegations specifically mention two sites — confirm both sites are covered in the documentation received",
+      "severity": "low",
+      "source": "case_notes"
+    }
+  ]
+}

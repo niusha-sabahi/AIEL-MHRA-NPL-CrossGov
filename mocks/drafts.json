@@ -1,0 +1,108 @@
+{
+  "CASE-2026-00042": {
+    "reminder": {
+      "action_type": "reminder",
+      "title": "Reminder to applicant — outstanding evidence",
+      "body": "Dear Jordan Smith,\n\nRe: Benefit Review — CASE-2026-00042 (REF-77291)\n\nWe wrote to you on 15 January 2026 requesting an income statement as part of your benefit review. We have received your proof of address, but the income statement remains outstanding.\n\nPlease provide this document within 14 days of the date of this letter. If we do not receive the outstanding evidence, your case may be escalated for further review, which could affect the outcome of your benefit assessment.\n\nIf you are experiencing difficulty obtaining this document, please contact us as soon as possible so we can discuss your options.\n\nYours sincerely,\n[Caseworker name]\nBenefits Review Team",
+      "recipient": "applicant",
+      "triggers_state_change": null,
+      "status": "pending"
+    },
+    "escalation_briefing": {
+      "action_type": "escalation_briefing",
+      "title": "Escalation briefing for team leader",
+      "body": "ESCALATION BRIEFING\n\nCase: CASE-2026-00042 (Jordan Smith, REF-77291)\nTeam: Team B\nDate: 16 April 2026\n\nReason for escalation:\nIncome statement evidence has been outstanding since 15 January 2026 (91 days), exceeding the 56-day escalation threshold defined in POL-BR-003.\n\nCase history:\n- 10 Jan 2026: Case created — triggered by change of address (Birmingham to Manchester)\n- 15 Jan 2026: Evidence requested — proof of address and income statement\n- 2 Feb 2026: Proof of address received; income statement still outstanding\n- Reminder threshold (28 days): passed 12 February 2026\n- Escalation threshold (56 days): passed 12 March 2026\n\nRelevant context:\n- Applicant stated employer has been contacted regarding income statement\n- Previous claim REF-55102 closed November 2025\n- Applicant relocated from Birmingham to Manchester in December 2025\n\nAction requested:\nGuidance on next steps — whether to issue a further reminder, arrange alternative contact, or proceed to a decision based on available evidence.",
+      "recipient": "team_leader",
+      "triggers_state_change": "escalated",
+      "status": "pending"
+    }
+  },
+  "CASE-2026-00091": {
+    "decision_letter": {
+      "action_type": "decision_letter",
+      "title": "Decision letter — licence application",
+      "body": "Dear Aisha Okafor,\n\nRe: Event Licence Application — CASE-2026-00091 (REF-88102)\n\nI am writing to inform you of the outcome of your application for an event licence for the annual community festival at the premises specified in your application.\n\nFollowing a review of your application, verification of all supporting documents, and a satisfactory premises inspection completed on 5 March 2026, I am pleased to confirm that your application has been approved.\n\nYour event licence is granted subject to the standard conditions set out in the enclosed schedule. Please ensure you are familiar with these conditions, as failure to comply may result in enforcement action.\n\nIf you have any questions about the conditions of your licence, please contact us.\n\nYours sincerely,\n[Senior Caseworker name]\nLicensing Team",
+      "recipient": "applicant",
+      "triggers_state_change": "closed",
+      "status": "pending"
+    }
+  },
+  "CASE-2026-00107": {
+    "briefing_note": {
+      "action_type": "briefing_note",
+      "title": "Briefing note for senior officer",
+      "body": "BRIEFING NOTE — SENIOR OFFICER\n\nCase: CASE-2026-00107 (Meridian Care Solutions Ltd, REF-90034)\nTeam: Team C\nDate: 16 April 2026\nClassification: Serious breach — escalation per POL-CC-003\n\nBackground:\nA compliance check was triggered on 28 January 2026 following a third-party referral. Documentation was requested on 4 February; partial records were received on 20 February with staff qualification records incomplete.\n\nSite visit findings (10 March 2026):\nTwo regulatory breaches identified:\n1. Two members of staff operating without required qualification certificates\n2. Record-keeping failures covering a six-month period\n\nBoth breaches meet the definition of 'serious breach' under POL-CC-003 as they present a risk to the public and involve repeated failure.\n\nActions taken:\n- Organisation notified of findings\n- Legal team copied in on 11 March 2026\n- Case escalated to senior officer on 11 March 2026\n\nRecommendation:\nEnforcement action is recommended. Options include:\n(a) Formal warning with mandatory remediation within 28 days\n(b) Referral for legal proceedings given the severity and systemic nature of the breaches\n\nAwaiting your instruction.",
+      "recipient": "senior_officer",
+      "triggers_state_change": null,
+      "status": "pending"
+    }
+  },
+  "CASE-2026-00133": {
+    "decision_letter": {
+      "action_type": "decision_letter",
+      "title": "Draft decision letter — benefit review",
+      "body": "Dear Callum Rafferty,\n\nRe: Benefit Review — CASE-2026-00133 (REF-66210)\n\nI am writing to inform you of the outcome of the review of your benefit entitlement, which was triggered by your reported change of employment status.\n\nFollowing an assessment of the evidence you provided — your P45, new employer details, and updated income statement — we have determined that your change from full-time to part-time employment (22 hours per week) results in your income falling below the relevant threshold.\n\nAccordingly, your benefit entitlement has been adjusted upward. The new award amount and effective date are set out in the enclosed schedule.\n\nIf you believe this decision is incorrect, you have the right to request a mandatory reconsideration within one month of the date of this letter. Details of how to do so are enclosed.\n\nYours sincerely,\n[Caseworker name]\nBenefits Review Team",
+      "recipient": "applicant",
+      "triggers_state_change": "closed",
+      "status": "pending"
+    }
+  },
+  "CASE-2026-00158": {
+    "reminder": {
+      "action_type": "reminder",
+      "title": "Reminder to applicant — outstanding evidence",
+      "body": "Dear Priya Mehta,\n\nRe: Benefit Review (Annual Reassessment) — CASE-2026-00158 (REF-71049)\n\nWe wrote to you on 5 March 2026 requesting a medical certificate and current income statement as part of your annual benefit reassessment. We have not yet received these documents.\n\nPlease provide the requested evidence within 14 days of the date of this letter. If we do not receive the outstanding documents, your case may be escalated for further review.\n\nIf you are having difficulty obtaining a medical certificate, please contact us so we can discuss alternative arrangements.\n\nYours sincerely,\n[Caseworker name]\nBenefits Review Team",
+      "recipient": "applicant",
+      "triggers_state_change": null,
+      "status": "pending"
+    }
+  },
+  "CASE-2026-00199": {
+    "evidence_request": {
+      "action_type": "evidence_request",
+      "title": "Evidence request to organisation",
+      "body": "Dear Greenfield Training Academy,\n\nRe: Compliance Check — CASE-2026-00199 (REF-94421)\n\nAs part of our scheduled annual compliance programme, we are conducting a review of your organisation's compliance with the relevant regulatory requirements.\n\nWe wrote to you on 18 March 2026 requesting the following documentation:\n- Course delivery records\n- Learner outcomes data\n- Tutor qualification certificates\n\nThe 28-day response period has now elapsed. Please provide the outstanding documentation within 7 working days of the date of this letter.\n\nFailure to provide the requested evidence may result in further action, including a site visit.\n\nYours sincerely,\n[Caseworker name]\nCompliance Team",
+      "recipient": "applicant",
+      "triggers_state_change": null,
+      "status": "pending"
+    }
+  },
+  "CASE-2026-00214": {
+    "escalation_briefing": {
+      "action_type": "escalation_briefing",
+      "title": "Escalation briefing for team leader",
+      "body": "ESCALATION BRIEFING\n\nCase: CASE-2026-00214 (Marcus Okonkwo, REF-55887)\nTeam: Team B\nDate: 16 April 2026\n\nReason for escalation:\nEvidence has been outstanding for 151 days, far exceeding the 56-day escalation threshold in POL-BR-003. The case was formally escalated on 20 January 2026 and has remained unresolved for 87 days in escalation.\n\nCase history:\n- 10 Nov 2025: Case created — triggered by change of address notification\n- 17 Nov 2025: Evidence requested — proof of new address and updated tenancy agreement\n- Day 28 (15 Dec 2025): First reminder sent\n- Day 42 (29 Dec 2025): Second reminder sent\n- 20 Jan 2026: Escalated to team leader — evidence outstanding 64 days\n- No response received to date\n\nComplicating factors:\n- Applicant's telephone number on record appears to be incorrect\n- Original trigger was a change of address — registered address for correspondence may also be outdated\n- All standard escalation steps have been exhausted\n\nAction requested:\nGuidance on whether to:\n(a) Attempt contact via alternative methods (home visit, contact via previous address)\n(b) Proceed to a decision based on available information\n(c) Suspend the case pending further investigation",
+      "recipient": "team_leader",
+      "triggers_state_change": null,
+      "status": "pending"
+    }
+  },
+  "CASE-2026-00231": {
+    "decision_letter": {
+      "action_type": "decision_letter",
+      "title": "Draft decision letter — licence application",
+      "body": "Dear Riverside Events Ltd,\n\nRe: Premises Licence Application — CASE-2026-00231 (REF-79003)\n\nI am writing to inform you of the outcome of your application for a premises licence for the outdoor venue specified in your application.\n\nDuring the 28-day public consultation period, two objections were received from local residents relating to potential noise impact on residential properties. Your updated noise management plan, submitted in response to these objections, has been reviewed.\n\nHaving considered the objections, your updated noise management plan, and all supporting documentation, [decision to be confirmed by senior caseworker].\n\n[If approved:] Your premises licence is granted subject to the conditions set out in the enclosed schedule, which include specific noise management requirements.\n\n[If refused:] Your application has been refused on the grounds set out below. You have the right to appeal this decision within 21 days.\n\nYours sincerely,\n[Senior Caseworker name]\nLicensing Team",
+      "recipient": "applicant",
+      "triggers_state_change": "closed",
+      "status": "pending"
+    },
+    "case_summary": {
+      "action_type": "case_summary",
+      "title": "Case summary for senior caseworker",
+      "body": "CASE SUMMARY FOR SENIOR CASEWORKER REVIEW\n\nCase: CASE-2026-00231 (Riverside Events Ltd, REF-79003)\nCase type: Licence application — new premises licence (outdoor venue)\nTeam: Team A\n\nApplication timeline:\n- 20 Feb 2026: Application received\n- 25 Feb 2026: Evidence requested (noise management plan, site plan, public liability insurance)\n- 10 Mar 2026: All documents received\n- 14 Mar 2026: 28-day public consultation opened\n- 1 Apr 2026: Consultation closed — two objections received\n\nObjections:\nTwo objections from local residents, both relating to potential noise impact on residential properties. No objections from responsible authorities (police, fire, environmental health).\n\nApplicant response:\nAn updated noise management plan has been submitted addressing the noise concerns raised.\n\nPolicy requirement:\nPer POL-LA-003, two or more substantive objections require senior caseworker review before a decision is issued.\n\nRecommendation:\nThe objections relate solely to noise, which the applicant has addressed with an updated plan. No objections from responsible authorities. Recommend approval with enhanced noise conditions.",
+      "recipient": "senior_caseworker",
+      "triggers_state_change": null,
+      "status": "pending"
+    }
+  },
+  "CASE-2026-00248": {
+    "outcome_letter": {
+      "action_type": "outcome_letter",
+      "title": "Draft outcome letter — compliance check",
+      "body": "Dear Hartwood Construction plc,\n\nRe: Compliance Check — CASE-2026-00248 (REF-62190)\n\nI am writing further to our compliance check, which was initiated on 1 March 2026.\n\nWe have reviewed the documentation you provided on 19 March 2026, including health and safety records, site inspection logs, and incident reports for the past 12 months.\n\nOur review has found your documentation to be largely compliant with the relevant requirements. However, we have identified one gap: there are no incident log entries for a six-week period in autumn 2025. We wrote to you on [date] requesting clarification on this gap and await your response.\n\nOnce we have received and reviewed your clarification, we will issue a final outcome. If the gap is satisfactorily explained, no further action will be required. If it cannot be explained, we may need to consider further investigation.\n\nYours sincerely,\n[Caseworker name]\nCompliance Team",
+      "recipient": "applicant",
+      "triggers_state_change": null,
+      "status": "pending"
+    }
+  }
+}

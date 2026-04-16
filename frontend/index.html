@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casework Assistant</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <header class="govuk-header">
+    <div class="govuk-header__container">
+      <a href="/" class="govuk-header__title">Casework Assistant</a>
+      <span class="govuk-header__user">Sarah Chen</span>
+    </div>
+  </header>
+
+  <main class="govuk-main">
+    <div id="stats-bar" class="stats-bar">
+      <div class="stats-bar__counts">
+        Loading cases...
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <select id="filter-type" class="filter-select">
+        <option value="">All types</option>
+        <option value="benefit_review">Benefit review</option>
+        <option value="licence_application">Licence application</option>
+        <option value="compliance_check">Compliance check</option>
+      </select>
+      <select id="filter-status" class="filter-select">
+        <option value="">All statuses</option>
+        <option value="awaiting_evidence">Awaiting evidence</option>
+        <option value="under_review">Under review</option>
+        <option value="pending_decision">Pending decision</option>
+        <option value="escalated">Escalated</option>
+        <option value="closed">Closed</option>
+      </select>
+      <input type="text" id="search-input" class="search-input" placeholder="Search cases...">
+    </div>
+
+    <div id="queue-list" class="queue-list">
+      <!-- Populated by JS -->
+    </div>
+  </main>
+
+  <script type="module" src="/js/queue.js"></script>
+</body>
+</html>
