@@ -25,7 +25,8 @@ export interface Case {
   case_type: CaseType
   status: CaseStatus
   applicant: Applicant
-  assigned_to: string
+  assigned_to: string // team
+  assigned_caseworker?: string // individual caseworker ID
   created_date: string
   last_updated: string
   timeline: TimelineEvent[]
