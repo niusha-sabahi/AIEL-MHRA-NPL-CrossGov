@@ -158,11 +158,6 @@ export default function CaseDetail({ currentCase: c, policies, workflow }: Props
               >
                 {STATUS_LABELS[c.status]}
               </span>
-              {c.status === 'escalated' && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded border bg-red-500 text-white border-red-600">
-                  ESCALATED
-                </span>
-              )}
             </div>
             <h2 className="text-xl font-bold text-govuk-black">{c.applicant.name}</h2>
             <p className="text-sm text-govuk-grey-3 mt-0.5">
