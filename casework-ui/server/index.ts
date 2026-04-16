@@ -22,6 +22,9 @@ import {
   setStatusOverride,
 } from './state.js'
 import { classifyActions } from './classifier.js'
+import casesData from '../src/data/cases.json' assert { type: 'json' }
+import policiesData from '../src/data/policy-extracts.json' assert { type: 'json' }
+import workflowData from '../src/data/workflow-states.json' assert { type: 'json' }
 
 // ─── Startup check ────────────────────────────────────────────────────────────
 
@@ -351,6 +354,105 @@ ${currentState ? JSON.stringify(currentState, null, 2) : 'Not found'}`
     type: 'message',
     content: textBlock.text,
   })
+})
+
+// ─── POST /cases/:caseId/actions/:actionType/chat ────────────────────────────
+// Draft-refinement chat. Loads case data server-side; client sends only the
+// current draft text and the conversation history.
+
+app.post('/cases/:caseId/actions/:actionType/chat', async (req, res) => {
+  const { caseId, actionType } = req.params
+  const { currentDraft, messages } = req.body as {
+    currentDraft: string
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>
+  }
+
+  if (!currentDraft || !messages) {
+    res.status(400).json({ error: 'Request body must include currentDraft and messages.' })
+    return
+  }
+
+  // Load and apply state overlays
+  const rawCase = (casesData as Case[]).find(c => c.case_id === caseId)
+  if (!rawCase) {
+    res.status(404).json({ error: `Case ${caseId} not found.` })
+    return
+  }
+  const c = applyOverlays(rawCase)
+
+  const policies = policiesData as PolicyExtract[]
+  const workflow = workflowData as WorkflowData
+
+  const matchedPolicies = policies.filter(p => p.applicable_case_types.includes(c.case_type))
+  const caseWorkflow = workflow.case_types[c.case_type]
+  const currentState: WorkflowState | null =
+    caseWorkflow?.states.find(s => s.state === c.status) ?? null
+
+  // Deadline flags (same logic as /analyse)
+  const evidenceEvent = c.timeline.find(e => e.event === 'evidence_requested')
+  const daysSinceEvidence = evidenceEvent ? daysSince(evidenceEvent.date) : null
+  const flags: string[] = []
+  if (daysSinceEvidence !== null && daysSinceEvidence >= 56) {
+    flags.push(`Evidence outstanding ${daysSinceEvidence} days — escalation threshold exceeded`)
+  } else if (daysSinceEvidence !== null && daysSinceEvidence >= 28) {
+    flags.push(`Evidence outstanding ${daysSinceEvidence} days — reminder required`)
+  }
+
+  const systemPrompt = `You are a casework assistant helping a UK government caseworker refine a draft ${actionType.replace(/_/g, ' ')} document.
+
+Your role is to help improve the draft while maintaining formal government correspondence standards.
+
+Rules:
+- Use formal government correspondence tone throughout
+- Reference specific policy numbers (e.g. POL-BR-003) when citing policy
+- If asked to rewrite the document, return the complete updated draft — not a summary or excerpt
+- Keep responses concise and actionable; avoid unnecessary explanation
+- Do not invent facts, dates, or policy provisions not present in the case record
+
+CASE: ${c.case_id} (${c.case_type.replace(/_/g, ' ')})
+Applicant: ${c.applicant.name} (${c.applicant.reference})
+Status: ${c.status.replace(/_/g, ' ')}
+Assigned to: ${c.assigned_to.replace(/_/g, ' ')}
+
+CASE NOTES:
+${c.case_notes}
+
+TIMELINE:
+${c.timeline.map(e => `  ${e.date}  ${e.event.replace(/_/g, ' ')}: ${e.note}`).join('\n')}
+${flags.length > 0 ? `\nFLAGS:\n${flags.map(f => `  ⚠ ${f}`).join('\n')}` : ''}
+
+APPLICABLE POLICIES:
+${matchedPolicies.map(p => `  ${p.policy_id} — ${p.title}\n  ${p.body}`).join('\n\n')}
+${currentState ? `\nCURRENT WORKFLOW STATE: ${currentState.label}\nRequired actions: ${currentState.required_actions.join('; ')}` : ''}
+
+CURRENT DRAFT (${actionType.replace(/_/g, ' ')}):
+${currentDraft}`
+
+  const model = process.env.ANTHROPIC_DEFAULT_OPUS_MODEL ?? 'claude-opus-4-6'
+
+  let message
+  try {
+    const stream = anthropic.messages.stream({
+      model,
+      max_tokens: 2048,
+      system: systemPrompt,
+      messages,
+    })
+    message = await stream.finalMessage()
+  } catch (err) {
+    console.error(`[${caseId}/chat] Claude API error`, err)
+    res.status(502).json({ error: 'Claude API call failed.', detail: String(err) })
+    return
+  }
+
+  const textBlock = message.content.find(b => b.type === 'text')
+  if (!textBlock || textBlock.type !== 'text') {
+    res.status(502).json({ error: 'No text content returned from Claude.' })
+    return
+  }
+
+  console.log(`[${caseId}] chat action='${actionType}' tokens out=${message.usage.output_tokens}`)
+  res.json({ reply: textBlock.text })
 })
 
 // ─── Health check ─────────────────────────────────────────────────────────────
