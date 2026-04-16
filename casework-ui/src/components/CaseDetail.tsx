@@ -416,6 +416,123 @@ function PolicyTab({
   )
 }
 
+type ApprovalState = 'pending' | 'approved' | 'rejected' | 'editing'
+
+function ActionApprovalCard({ recommendation }: { recommendation: string }) {
+  const [state, setState] = useState<ApprovalState>('pending')
+  const [editedText, setEditedText] = useState(recommendation)
+  const [savedText, setSavedText] = useState(recommendation)
+  const [actionTime, setActionTime] = useState<string>('')
+
+  function timestamp() {
+    return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  }
+
+  function handleApprove() {
+    setActionTime(timestamp())
+    setState('approved')
+  }
+
+  function handleReject() {
+    setActionTime(timestamp())
+    setState('rejected')
+  }
+
+  function handleSaveEdit() {
+    setSavedText(editedText)
+    setActionTime(timestamp())
+    setState('approved')
+  }
+
+  if (state === 'rejected') {
+    return (
+      <div className="border border-gray-200 rounded p-4 bg-gray-50 text-sm text-govuk-grey-3 flex items-center gap-2">
+        <span>✕</span>
+        <span>Recommended action rejected at {actionTime}</span>
+        <button
+          onClick={() => { setState('pending'); setEditedText(savedText) }}
+          className="ml-auto text-xs text-govuk-blue hover:underline"
+        >
+          Undo
+        </button>
+      </div>
+    )
+  }
+
+  if (state === 'approved') {
+    return (
+      <div className="border border-green-200 rounded p-4 bg-green-50">
+        <div className="flex items-center gap-2 mb-2 text-green-800 text-sm font-semibold">
+          <span>✓</span>
+          <span>Approved at {actionTime}</span>
+          <button
+            onClick={() => setState('pending')}
+            className="ml-auto text-xs text-govuk-blue hover:underline font-normal"
+          >
+            Undo
+          </button>
+        </div>
+        <p className="text-sm text-govuk-black leading-relaxed">{savedText}</p>
+      </div>
+    )
+  }
+
+  if (state === 'editing') {
+    return (
+      <div className="border border-govuk-blue rounded p-4">
+        <textarea
+          className="w-full text-sm text-govuk-black leading-relaxed border border-gray-300 rounded p-2 resize-none focus:outline-none focus:border-govuk-blue"
+          rows={4}
+          value={editedText}
+          onChange={e => setEditedText(e.target.value)}
+          autoFocus
+        />
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={handleSaveEdit}
+            className="text-sm font-semibold bg-govuk-blue text-white px-3 py-1.5 rounded hover:bg-govuk-blue-dark transition-colors"
+          >
+            Approve edited version
+          </button>
+          <button
+            onClick={() => { setState('pending'); setEditedText(savedText) }}
+            className="text-sm text-govuk-grey-3 px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // pending
+  return (
+    <div className="border border-gray-200 rounded p-4">
+      <p className="text-sm text-govuk-black leading-relaxed mb-4">{savedText}</p>
+      <div className="flex gap-2">
+        <button
+          onClick={handleApprove}
+          className="text-sm font-semibold bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors"
+        >
+          Approve
+        </button>
+        <button
+          onClick={() => setState('editing')}
+          className="text-sm font-semibold text-govuk-blue border border-govuk-blue px-3 py-1.5 rounded hover:bg-blue-50 transition-colors"
+        >
+          Edit
+        </button>
+        <button
+          onClick={handleReject}
+          className="text-sm font-semibold text-red-700 border border-red-300 px-3 py-1.5 rounded hover:bg-red-50 transition-colors"
+        >
+          Reject
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function AnalysisTab({
   analysing,
   result,
@@ -511,9 +628,9 @@ function AnalysisTab({
         </Section>
       )}
 
-      {/* Recommendation */}
-      <Section title="Recommendation">
-        <p className="text-sm text-govuk-black leading-relaxed">{result.recommendation}</p>
+      {/* Recommendation — human-in-the-loop approval */}
+      <Section title="Recommended action">
+        <ActionApprovalCard recommendation={result.recommendation} />
       </Section>
 
       {/* Assignment */}
