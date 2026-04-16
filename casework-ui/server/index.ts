@@ -3,7 +3,10 @@
  *
  * POST /analyse  { case, policies, workflow }  →  AnalysisResult
  *
- * Requires: ANTHROPIC_API_KEY environment variable
+ * Requires one of:
+ *   ANTHROPIC_API_KEY   — standard Anthropic API key, or
+ *   ANTHROPIC_AUTH_TOKEN — token for a shared proxy (set ANTHROPIC_BASE_URL too)
+ *
  * Run with:  npm run server  (from casework-ui/)
  */
 
@@ -15,10 +18,14 @@ import { buildSystemPrompt, buildUserMessage } from './prompt.js'
 
 // ─── Startup check ────────────────────────────────────────────────────────────
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error('\n⚠  ANTHROPIC_API_KEY is not set.')
-  console.error('   Export it before starting the server:\n')
-  console.error('   export ANTHROPIC_API_KEY=sk-ant-...\n')
+const apiKey = process.env.ANTHROPIC_AUTH_TOKEN ?? process.env.ANTHROPIC_API_KEY
+
+if (!apiKey) {
+  console.error('\n⚠  No API key found.')
+  console.error('   Set one of the following before starting the server:\n')
+  console.error('   export ANTHROPIC_API_KEY=sk-ant-...        (direct Anthropic)')
+  console.error('   export ANTHROPIC_AUTH_TOKEN=<token>        (shared proxy)')
+  console.error('   export ANTHROPIC_BASE_URL=https://...      (proxy base URL)\n')
   process.exit(1)
 }
 
@@ -28,7 +35,10 @@ const app = express()
 app.use(cors())
 app.use(express.json({ limit: '2mb' }))
 
-const anthropic = new Anthropic()
+const anthropic = new Anthropic({
+  apiKey,
+  ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
+})
 
 const TODAY = '2026-04-16'
 const TODAY_DATE = new Date(TODAY)
@@ -64,8 +74,9 @@ app.post('/analyse', async (req, res) => {
   const daysSinceEvidence = evidenceEvent ? daysSince(evidenceEvent.date) : null
 
   // Call Claude — stream to avoid HTTP timeouts on longer responses
+  const model = process.env.ANTHROPIC_DEFAULT_OPUS_MODEL ?? 'claude-opus-4-6'
   const stream = anthropic.messages.stream({
-    model: 'claude-opus-4-6',
+    model,
     max_tokens: 4096,
     thinking: { type: 'adaptive' },
     system: buildSystemPrompt(),
@@ -126,6 +137,9 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 // ─── Start ────────────────────────────────────────────────────────────────────
 
 app.listen(8000, () => {
+  const model = process.env.ANTHROPIC_DEFAULT_OPUS_MODEL ?? 'claude-opus-4-6'
+  const base = process.env.ANTHROPIC_BASE_URL ?? 'https://api.anthropic.com'
   console.log('\n✓  Casework AI server running at http://localhost:8000')
-  console.log('   POST /analyse  →  Claude claude-opus-4-6 (adaptive thinking)\n')
+  console.log(`   POST /analyse  →  ${model}`)
+  console.log(`   Base URL: ${base}\n`)
 })
