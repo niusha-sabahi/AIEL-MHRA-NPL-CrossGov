@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.core import loader
-from backend.routes import cases, actions
+from backend.routes import cases, actions, chat
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
@@ -29,6 +29,7 @@ app.add_middleware(
 
 app.include_router(cases.router)
 app.include_router(actions.router)
+app.include_router(chat.router)
 
 # Mount static assets (CSS, JS)
 app.mount("/css", StaticFiles(directory=FRONTEND_DIR / "css"), name="css")

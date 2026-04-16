@@ -77,3 +77,27 @@ async def edit_action(case_id: str, action_type: str, request: ActionRequest):
         "action_type": action_type,
         "timestamp": datetime.now().isoformat(),
     }
+
+
+@router.post("/{case_id}/actions/{action_type}/complete")
+async def complete_action(case_id: str, action_type: str):
+    """Mark a non-draft action (A/C/D) as completed."""
+    case = loader.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    loader.set_action_state(case_id, action_type, "completed")
+
+    now = datetime.now().strftime("%Y-%m-%d")
+    loader.add_timeline_entry(case_id, {
+        "date": now,
+        "event": f"{action_type}_completed",
+        "note": f"Action completed by Sarah Chen at {datetime.now().strftime('%H:%M')}",
+    })
+
+    return {
+        "status": "completed",
+        "case_id": case_id,
+        "action_type": action_type,
+        "timestamp": datetime.now().isoformat(),
+    }

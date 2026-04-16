@@ -57,3 +57,30 @@ export async function editAction(caseId, actionType, editedBody) {
   if (!res.ok) throw new Error(`Failed to edit: ${res.status}`);
   return res.json();
 }
+
+export async function completeAction(caseId, actionType) {
+  const res = await fetch(`${API_BASE}/cases/${caseId}/actions/${actionType}/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error(`Failed to complete: ${res.status}`);
+  return res.json();
+}
+
+export async function chatWithAI(caseId, actionType, currentDraft, messages) {
+  const res = await fetch(`${API_BASE}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      case_id: caseId,
+      action_type: actionType,
+      current_draft: currentDraft,
+      messages: messages,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Chat failed: ${err}`);
+  }
+  return res.json();
+}
