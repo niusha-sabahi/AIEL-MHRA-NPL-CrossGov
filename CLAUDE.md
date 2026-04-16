@@ -23,10 +23,10 @@ Two processes, one codebase:
 **AI server** (`server/`) — Express at port 8000. `server/index.ts` handles the single `POST /analyse` route: it receives `{case, policies, workflow}`, derives matched policies and deadline context, then calls Claude via the Anthropic SDK. `server/prompt.ts` is intentionally isolated — it's the only file to edit when iterating on analysis quality. The server/frontend interface is the `AnalysisResult` type in `src/types.ts`.
 
 **Data flow for AI analysis:**
-1. `CaseDetail.tsx` calls `analyseCase()` from `src/mockAnalyse.ts`
-2. `mockAnalyse.ts` POSTs to `localhost:8000/analyse` with the full case, all policies, and workflow data
+1. `CaseDetail.tsx` calls `analyseCase()` from `src/analyseCase.ts`
+2. `analyseCase.ts` POSTs to `localhost:8000/analyse` with the full case, all policies, and workflow data
 3. The server filters to matched policies, calculates deadline days, calls Claude, extracts JSON from the response
-4. On network failure (server not running), `mockAnalyse.ts` returns a fallback with `_isMock: true` — the UI uses this flag to show an offline banner
+4. On network failure (server not running), `analyseCase.ts` returns a fallback with `_isMock: true` — the UI uses this flag to show an offline banner
 
 ## TypeScript config
 

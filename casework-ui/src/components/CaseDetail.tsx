@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Case, PolicyExtract, WorkflowData, WorkflowState, AnalysisResult, Priority } from '../types'
-import { analyseCase } from '../mockAnalyse'
+import { analyseCase } from '../analyseCase'
 
 interface Props {
   currentCase: Case
