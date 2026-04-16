@@ -20,7 +20,14 @@ Two processes, one codebase:
 
 **Frontend** (`src/`) — Vite + React 18 + TypeScript + Tailwind CSS. All data is loaded at startup from static JSON files in `src/data/` and passed down as props. No client-side routing, no state management library. `App.tsx` is the root — it holds `selectedCase` state and renders `CaseList` (left panel) + `CaseDetail` (right panel) side by side.
 
-**AI server** (`server/`) — Express at port 8000. `server/index.ts` handles the single `POST /analyse` route: it receives `{case, policies, workflow}`, derives matched policies and deadline context, then calls Claude via the Anthropic SDK. `server/prompt.ts` is intentionally isolated — it's the only file to edit when iterating on analysis quality. The server/frontend interface is the `AnalysisResult` type in `src/types.ts`.
+**AI server** (`server/`) — Express at port 8000. Routes:
+- `POST /analyse` — receives `{case, policies, workflow}`, derives matched policies and deadline context, calls Claude, appends classified actions, returns `AnalysisResult`
+- `POST /chat` — general analysis chat; client sends full case + conversation history, returns `{type, content|analysis}`
+- `POST /cases/:caseId/actions/:actionType/approve` — records approval in memory, adds timeline entry, optionally transitions status
+- `POST /cases/:caseId/actions/:actionType/reject` — records rejection in memory, adds timeline entry
+- `POST /cases/:caseId/actions/:actionType/chat` — draft-refinement chat; **loads case data server-side** from JSON, applies overlays, calls Claude, returns `{reply: string}`
+
+`server/prompt.ts` is intentionally isolated — it's the only file to edit when iterating on analysis quality. The server/frontend interface is the `AnalysisResult` type in `src/types.ts`.
 
 **Data flow for AI analysis:**
 1. `CaseDetail.tsx` calls `analyseCase()` from `src/analyseCase.ts`
@@ -47,11 +54,23 @@ The `npm run server` script passes `.env` via `tsx --env-file=.env`.
 
 ## Key types
 
-All shared types are in `src/types.ts`. The three case types are `benefit_review`, `licence_application`, `compliance_check`. The six workflow statuses map directly to states in `workflow-states.json`. `AnalysisResult._isMock` is a frontend-only flag set by the fallback — it is never returned by the real server.
+All shared types are in `src/types.ts`. The three case types are `benefit_review`, `licence_application`, `compliance_check`. The six workflow statuses map directly to states in `workflow-states.json`. `AnalysisResult._isMock` is a frontend-only flag set by the fallback — it is never returned by the real server. `ClassifiedAction` carries `{text, category (A/B/C/D), actionType, applicable}` and is appended to `AnalysisResult.classified_actions` by `server/classifier.ts` after each `/analyse` call.
 
 ## Human-in-the-loop approval
 
-The AI Analysis tab renders the recommended action as an interactive `ActionApprovalCard` component inside `CaseDetail.tsx`. It has three states: pending (Approve / Edit / Reject buttons), editing (inline textarea → Approve edited version), and terminal (approved or rejected, with timestamp). All state is local to the component — no backend call is made. This is intentional: approval is a UI-layer concept representing the caseworker's sign-off before any action would be taken.
+The AI Analysis tab is implemented in `src/components/AnalysisTabEditable.tsx`. The recommended action is displayed as a bordered card with four states: pending (Approve / Edit / Reject / Regenerate buttons), editing (inline textarea → Approve edited version), and terminal (approved or rejected, with timestamp). Approve/Reject POST to the server (`/cases/:id/actions/:type/approve|reject`) which persists state in memory. Edit state is local-only.
+
+The card also contains an inline **AI chat panel** toggled by "Refine with AI". It calls `POST /cases/:id/actions/recommendation/chat` with `{currentDraft, messages}` — the server loads case data itself. Replies longer than 100 characters show a "Use this draft" button to replace the current recommendation text.
+
+## In-memory state and action classification
+
+`server/state.ts` holds three Maps (never persisted): action outcomes (`approved`/`rejected`/`edited`), extra timeline entries, and status overrides. `applyOverlays(case)` merges all three onto a case object before any Claude call — ensuring the AI always sees the latest caseworker actions within a server session.
+
+`server/classifier.ts` exports `classifyActions(requiredActions, case, workflowState)` which maps each action string to a category:
+- **A** — default (informational/documentation)
+- **B** — requires a backend call (9 keyword→actionType mappings, e.g. "send reminder" → `send_reminder`)
+- **C** — logging/admin tasks
+- **D** — policy-conditional (escalation thresholds and reconsideration logic; D conditions are checked before B)
 
 ## Deadline logic
 
