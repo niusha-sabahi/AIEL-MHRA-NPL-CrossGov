@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "composite": true,
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "strict": true
+    "strict": true,
+    "noEmit": true
   },
-  "include": ["server"]
+  "include": ["server", "src/types.ts"]
 }

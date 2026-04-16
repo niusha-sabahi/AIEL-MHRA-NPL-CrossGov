@@ -15,6 +15,13 @@ import cors from 'cors'
 import Anthropic from '@anthropic-ai/sdk'
 import type { Case, PolicyExtract, WorkflowData, WorkflowState, AnalysisResult } from '../src/types.js'
 import { buildSystemPrompt, buildUserMessage } from './prompt.js'
+import {
+  applyOverlays,
+  setActionState,
+  addTimelineEntry,
+  setStatusOverride,
+} from './state.js'
+import { classifyActions } from './classifier.js'
 
 // ─── Startup check ────────────────────────────────────────────────────────────
 
@@ -61,16 +68,19 @@ app.post('/analyse', async (req, res) => {
     return
   }
 
+  // Apply any in-memory state overrides (status transitions, added timeline entries)
+  const effectiveCase = applyOverlays(c)
+
   // Derive context the prompt needs
   const matchedPolicies = policies.filter(p =>
-    p.applicable_case_types.includes(c.case_type),
+    p.applicable_case_types.includes(effectiveCase.case_type),
   )
 
-  const caseWorkflow = workflow.case_types[c.case_type]
+  const caseWorkflow = workflow.case_types[effectiveCase.case_type]
   const currentState: WorkflowState | null =
-    caseWorkflow?.states.find(s => s.state === c.status) ?? null
+    caseWorkflow?.states.find(s => s.state === effectiveCase.status) ?? null
 
-  const evidenceEvent = c.timeline.find(e => e.event === 'evidence_requested')
+  const evidenceEvent = effectiveCase.timeline.find(e => e.event === 'evidence_requested')
   const daysSinceEvidence = evidenceEvent ? daysSince(evidenceEvent.date) : null
 
   // Call Claude — stream to avoid HTTP timeouts on longer responses
@@ -84,7 +94,7 @@ app.post('/analyse', async (req, res) => {
     messages: [
       {
         role: 'user',
-        content: buildUserMessage(c, matchedPolicies, currentState, daysSinceEvidence, TODAY),
+        content: buildUserMessage(effectiveCase, matchedPolicies, currentState, daysSinceEvidence, TODAY),
       },
     ],
   })
@@ -125,10 +135,75 @@ app.post('/analyse', async (req, res) => {
   // Log token usage for visibility
   const { input_tokens, output_tokens, cache_read_input_tokens } = message.usage
   console.log(
-    `[${c.case_id}] tokens in=${input_tokens} (cache_read=${cache_read_input_tokens ?? 0}) out=${output_tokens}`,
+    `[${effectiveCase.case_id}] tokens in=${input_tokens} (cache_read=${cache_read_input_tokens ?? 0}) out=${output_tokens}`,
   )
 
+  // Classify the workflow required_actions for the current state
+  if (currentState) {
+    result.classified_actions = classifyActions(
+      currentState.required_actions,
+      effectiveCase,
+      currentState,
+    )
+  }
+
   res.json(result)
+})
+
+// ─── POST /cases/:caseId/actions/:actionType/approve ──────────────────────────
+
+app.post('/cases/:caseId/actions/:actionType/approve', (req, res) => {
+  const { caseId, actionType } = req.params
+  const { nextStatus } = req.body as { nextStatus?: string }
+
+  const timestamp = new Date().toISOString()
+
+  setActionState(caseId, actionType, 'approved')
+
+  addTimelineEntry(caseId, {
+    date: TODAY,
+    event: actionType,
+    note: `Action '${actionType}' approved by caseworker at ${new Date(timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}.`,
+  })
+
+  if (nextStatus) {
+    setStatusOverride(caseId, nextStatus)
+  }
+
+  console.log(`[${caseId}] action '${actionType}' approved${nextStatus ? ` → status '${nextStatus}'` : ''}`)
+
+  res.json({
+    caseId,
+    actionType,
+    outcome: 'approved',
+    timestamp,
+    status: nextStatus ?? null,
+  })
+})
+
+// ─── POST /cases/:caseId/actions/:actionType/reject ───────────────────────────
+
+app.post('/cases/:caseId/actions/:actionType/reject', (req, res) => {
+  const { caseId, actionType } = req.params
+
+  const timestamp = new Date().toISOString()
+
+  setActionState(caseId, actionType, 'rejected')
+
+  addTimelineEntry(caseId, {
+    date: TODAY,
+    event: actionType,
+    note: `Action '${actionType}' rejected by caseworker at ${new Date(timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}.`,
+  })
+
+  console.log(`[${caseId}] action '${actionType}' rejected`)
+
+  res.json({
+    caseId,
+    actionType,
+    outcome: 'rejected',
+    timestamp,
+  })
 })
 
 // ─── Health check ─────────────────────────────────────────────────────────────

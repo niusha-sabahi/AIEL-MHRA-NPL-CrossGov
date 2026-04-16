@@ -97,7 +97,6 @@ export default function ApplicantView({ cases, user }: Props) {
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         {userCases.map(c => {
           const statusInfo = STATUS_INFO[c.status]
-          const lastUpdate = c.timeline[c.timeline.length - 1]
 
           return (
             <div key={c.case_id} className="bg-white rounded-lg border border-gray-200 overflow-hidden">

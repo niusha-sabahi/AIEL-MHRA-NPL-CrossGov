@@ -61,6 +61,15 @@ export interface WorkflowData {
 
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
 
+export type ActionCategory = 'A' | 'B' | 'C' | 'D'
+
+export interface ClassifiedAction {
+  text: string
+  category: ActionCategory
+  actionType: string | null
+  applicable: boolean
+}
+
 export interface AnalysisResult {
   matched_policy_id: string
   matched_policy_title: string
@@ -69,5 +78,6 @@ export interface AnalysisResult {
   priority: Priority
   summary: string
   flags: string[]
+  classified_actions?: ClassifiedAction[]
   _isMock?: boolean
 }
