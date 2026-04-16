@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Case, PolicyExtract, WorkflowData, WorkflowState, AnalysisResult, Priority } from '../types'
 import { analyseCase } from '../analyseCase'
+import AnalysisTabEditable from './AnalysisTabEditable'
 
 interface Props {
   currentCase: Case
@@ -243,7 +244,7 @@ export default function CaseDetail({ currentCase: c, policies, workflow }: Props
           <PolicyTab matchedPolicies={matchedPolicies} currentState={currentState} c={c} />
         )}
         {activeTab === 'analysis' && (
-          <AnalysisTab
+          <AnalysisTabEditable
             analysing={analysing}
             result={showAnalysis ? analysis : null}
             onAnalyse={handleAnalyse}
@@ -418,10 +419,11 @@ function PolicyTab({
 
 type ApprovalState = 'pending' | 'approved' | 'rejected' | 'editing'
 
-function ActionApprovalCard({ recommendation }: { recommendation: string }) {
+function ActionApprovalCard({ recommendation, onRegenerate }: { recommendation: string; onRegenerate: () => void }) {
   const [state, setState] = useState<ApprovalState>('pending')
   const [editedText, setEditedText] = useState(recommendation)
   const [savedText, setSavedText] = useState(recommendation)
+  const [originalText] = useState(recommendation) // Keep original immutable
   const [actionTime, setActionTime] = useState<string>('')
 
   function timestamp() {
@@ -444,6 +446,12 @@ function ActionApprovalCard({ recommendation }: { recommendation: string }) {
     setState('approved')
   }
 
+  function handleRevertToOriginal() {
+    setEditedText(originalText)
+    setSavedText(originalText)
+    setState('pending')
+  }
+
   if (state === 'rejected') {
     return (
       <div className="border border-gray-200 rounded p-4 bg-gray-50 text-sm text-govuk-grey-3 flex items-center gap-2">
@@ -460,17 +468,28 @@ function ActionApprovalCard({ recommendation }: { recommendation: string }) {
   }
 
   if (state === 'approved') {
+    const wasEdited = savedText !== originalText
     return (
       <div className="border border-green-200 rounded p-4 bg-green-50">
         <div className="flex items-center gap-2 mb-2 text-green-800 text-sm font-semibold">
           <span>✓</span>
           <span>Approved at {actionTime}</span>
-          <button
-            onClick={() => setState('pending')}
-            className="ml-auto text-xs text-govuk-blue hover:underline font-normal"
-          >
-            Undo
-          </button>
+          <div className="ml-auto flex gap-2">
+            <button
+              onClick={() => setState('pending')}
+              className="text-xs text-govuk-blue hover:underline font-normal"
+            >
+              Undo
+            </button>
+            {wasEdited && (
+              <button
+                onClick={handleRevertToOriginal}
+                className="text-xs text-amber-700 hover:underline font-normal"
+              >
+                Revert to original
+              </button>
+            )}
+          </div>
         </div>
         <p className="text-sm text-govuk-black leading-relaxed">{savedText}</p>
       </div>
@@ -506,10 +525,11 @@ function ActionApprovalCard({ recommendation }: { recommendation: string }) {
   }
 
   // pending
+  const wasEdited = savedText !== originalText
   return (
     <div className="border border-gray-200 rounded p-4">
       <p className="text-sm text-govuk-black leading-relaxed mb-4">{savedText}</p>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <button
           onClick={handleApprove}
           className="text-sm font-semibold bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors"
@@ -528,6 +548,174 @@ function ActionApprovalCard({ recommendation }: { recommendation: string }) {
         >
           Reject
         </button>
+        <button
+          onClick={onRegenerate}
+          className="text-sm font-semibold text-purple-700 border border-purple-300 px-3 py-1.5 rounded hover:bg-purple-50 transition-colors flex items-center gap-1.5"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Regenerate
+        </button>
+        {wasEdited && (
+          <button
+            onClick={handleRevertToOriginal}
+            className="text-sm font-semibold text-amber-700 border border-amber-300 px-3 py-1.5 rounded hover:bg-amber-50 transition-colors ml-auto"
+          >
+            Revert to original
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function SummaryApprovalCard({ summary, onRegenerate }: { summary: string; onRegenerate: () => void }) {
+  const [state, setState] = useState<ApprovalState>('pending')
+  const [editedText, setEditedText] = useState(summary)
+  const [savedText, setSavedText] = useState(summary)
+  const [originalText] = useState(summary) // Keep original immutable
+  const [actionTime, setActionTime] = useState<string>('')
+
+  function timestamp() {
+    return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  }
+
+  function handleApprove() {
+    setActionTime(timestamp())
+    setState('approved')
+  }
+
+  function handleReject() {
+    setActionTime(timestamp())
+    setState('rejected')
+  }
+
+  function handleSaveEdit() {
+    setSavedText(editedText)
+    setActionTime(timestamp())
+    setState('approved')
+  }
+
+  function handleRevertToOriginal() {
+    setEditedText(originalText)
+    setSavedText(originalText)
+    setState('pending')
+  }
+
+  if (state === 'rejected') {
+    return (
+      <div className="border border-gray-200 rounded p-4 bg-gray-50 text-sm text-govuk-grey-3 flex items-center gap-2">
+        <span>✕</span>
+        <span>Summary rejected at {actionTime}</span>
+        <button
+          onClick={() => { setState('pending'); setEditedText(savedText) }}
+          className="ml-auto text-xs text-govuk-blue hover:underline"
+        >
+          Undo
+        </button>
+      </div>
+    )
+  }
+
+  if (state === 'approved') {
+    const wasEdited = savedText !== originalText
+    return (
+      <div className="border border-green-200 rounded p-4 bg-green-50">
+        <div className="flex items-center gap-2 mb-2 text-green-800 text-sm font-semibold">
+          <span>✓</span>
+          <span>Approved at {actionTime}</span>
+          <div className="ml-auto flex gap-2">
+            <button
+              onClick={() => setState('pending')}
+              className="text-xs text-govuk-blue hover:underline font-normal"
+            >
+              Undo
+            </button>
+            {wasEdited && (
+              <button
+                onClick={handleRevertToOriginal}
+                className="text-xs text-amber-700 hover:underline font-normal"
+              >
+                Revert to original
+              </button>
+            )}
+          </div>
+        </div>
+        <p className="text-sm text-govuk-black leading-relaxed">{savedText}</p>
+      </div>
+    )
+  }
+
+  if (state === 'editing') {
+    return (
+      <div className="border border-govuk-blue rounded p-4">
+        <textarea
+          className="w-full text-sm text-govuk-black leading-relaxed border border-gray-300 rounded p-2 resize-none focus:outline-none focus:border-govuk-blue"
+          rows={6}
+          value={editedText}
+          onChange={e => setEditedText(e.target.value)}
+          autoFocus
+        />
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={handleSaveEdit}
+            className="text-sm font-semibold bg-govuk-blue text-white px-3 py-1.5 rounded hover:bg-govuk-blue-dark transition-colors"
+          >
+            Approve edited version
+          </button>
+          <button
+            onClick={() => { setState('pending'); setEditedText(savedText) }}
+            className="text-sm text-govuk-grey-3 px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // pending
+  const wasEdited = savedText !== originalText
+  return (
+    <div className="border border-gray-200 rounded p-4 bg-govuk-grey-1">
+      <p className="text-sm text-govuk-black leading-relaxed mb-4">{savedText}</p>
+      <div className="flex gap-2 flex-wrap">
+        <button
+          onClick={handleApprove}
+          className="text-sm font-semibold bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors"
+        >
+          Approve
+        </button>
+        <button
+          onClick={() => setState('editing')}
+          className="text-sm font-semibold text-govuk-blue border border-govuk-blue px-3 py-1.5 rounded hover:bg-blue-50 transition-colors"
+        >
+          Edit
+        </button>
+        <button
+          onClick={handleReject}
+          className="text-sm font-semibold text-red-700 border border-red-300 px-3 py-1.5 rounded hover:bg-red-50 transition-colors"
+        >
+          Reject
+        </button>
+        <button
+          onClick={onRegenerate}
+          className="text-sm font-semibold text-purple-700 border border-purple-300 px-3 py-1.5 rounded hover:bg-purple-50 transition-colors flex items-center gap-1.5"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Regenerate
+        </button>
+        {wasEdited && (
+          <button
+            onClick={handleRevertToOriginal}
+            className="text-sm font-semibold text-amber-700 border border-amber-300 px-3 py-1.5 rounded hover:bg-amber-50 transition-colors ml-auto"
+          >
+            Revert to original
+          </button>
+        )}
       </div>
     </div>
   )
@@ -606,9 +794,7 @@ function AnalysisTab({
 
       {/* Summary */}
       <Section title="Case summary">
-        <p className="text-sm text-govuk-black leading-relaxed bg-govuk-grey-1 rounded border border-gray-200 p-4">
-          {result.summary}
-        </p>
+        <SummaryApprovalCard summary={result.summary} onRegenerate={onAnalyse} />
       </Section>
 
       {/* Flags */}
@@ -630,7 +816,7 @@ function AnalysisTab({
 
       {/* Recommendation — human-in-the-loop approval */}
       <Section title="Recommended action">
-        <ActionApprovalCard recommendation={result.recommendation} />
+        <ActionApprovalCard recommendation={result.recommendation} onRegenerate={onAnalyse} />
       </Section>
 
       {/* Assignment */}
