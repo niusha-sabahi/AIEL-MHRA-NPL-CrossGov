@@ -49,6 +49,10 @@ The `npm run server` script passes `.env` via `tsx --env-file=.env`.
 
 All shared types are in `src/types.ts`. The three case types are `benefit_review`, `licence_application`, `compliance_check`. The six workflow statuses map directly to states in `workflow-states.json`. `AnalysisResult._isMock` is a frontend-only flag set by the fallback — it is never returned by the real server.
 
+## Human-in-the-loop approval
+
+The AI Analysis tab renders the recommended action as an interactive `ActionApprovalCard` component inside `CaseDetail.tsx`. It has three states: pending (Approve / Edit / Reject buttons), editing (inline textarea → Approve edited version), and terminal (approved or rejected, with timestamp). All state is local to the component — no backend call is made. This is intentional: approval is a UI-layer concept representing the caseworker's sign-off before any action would be taken.
+
 ## Deadline logic
 
 Cases in `awaiting_evidence` status are checked against their `evidence_requested` timeline event. Thresholds: 28 days → amber warning, 56 days → red escalation. This logic appears in both `CaseList.tsx` (list flags) and `CaseDetail.tsx` (header banners), and also in `server/index.ts` (passed to Claude as context). `TODAY` is hardcoded to `2026-04-16` in all three places.
