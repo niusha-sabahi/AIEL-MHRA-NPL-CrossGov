@@ -115,6 +115,16 @@ def build_case_brief(case_id: str) -> CaseBrief | None:
     )
 
 
+def _all_actions_handled(brief: CaseBrief) -> bool:
+    """Check if every B action has been approved or rejected."""
+    for a in brief.pending_b_actions:
+        if a.action_type:
+            state = loader.get_action_state(brief.case_id, a.action_type)
+            if state not in ("approved", "rejected"):
+                return False
+    return len(brief.pending_b_actions) > 0
+
+
 def build_queue() -> list[CaseQueueItem]:
     """Build sorted queue of all cases."""
     cases = loader.get_cases()
@@ -123,6 +133,11 @@ def build_queue() -> list[CaseQueueItem]:
     for case in cases:
         brief = build_case_brief(case["case_id"])
         if not brief:
+            continue
+        # Skip closed cases or cases where all actions are handled
+        if brief.status == "closed":
+            continue
+        if _all_actions_handled(brief):
             continue
         items.append(CaseQueueItem(
             case_id=brief.case_id,
