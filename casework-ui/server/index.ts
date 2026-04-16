@@ -206,6 +206,153 @@ app.post('/cases/:caseId/actions/:actionType/reject', (req, res) => {
   })
 })
 
+// ─── POST /chat ───────────────────────────────────────────────────────────────
+
+app.post('/chat', async (req, res) => {
+  console.log('[/chat] Request received')
+
+  const { case: c, policies, workflow, currentAnalysis, userMessage, conversationHistory } = req.body as {
+    case: Case
+    policies: PolicyExtract[]
+    workflow: WorkflowData
+    currentAnalysis: AnalysisResult
+    userMessage: string
+    conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>
+  }
+
+  if (!c || !policies || !workflow || !currentAnalysis || !userMessage) {
+    console.error('[/chat] Missing required fields:', {
+      hasCase: !!c,
+      hasPolicies: !!policies,
+      hasWorkflow: !!workflow,
+      hasCurrentAnalysis: !!currentAnalysis,
+      hasUserMessage: !!userMessage,
+    })
+    res.status(400).json({ error: 'Missing required fields.' })
+    return
+  }
+
+  console.log(`[/chat] Processing message for case ${c.case_id}: "${userMessage}"`)
+
+  const matchedPolicies = policies.filter(p =>
+    p.applicable_case_types.includes(c.case_type),
+  )
+
+  const caseWorkflow = workflow.case_types[c.case_type]
+  const currentState: WorkflowState | null =
+    caseWorkflow?.states.find(s => s.state === c.status) ?? null
+
+  const systemPrompt = `You are an AI assistant helping a UK government caseworker with case analysis.
+
+You have access to:
+- The full case record
+- Applicable policies
+- Current workflow state
+- The current analysis you generated
+
+The caseworker can ask you to:
+- Refine or modify the analysis (e.g., "make the summary shorter", "change priority to high")
+- Generate additional outputs (e.g., "write an email summary", "draft a letter to the applicant")
+- Answer questions about the case or policies
+
+When asked to modify the analysis, return a JSON object with the updated analysis in this exact format:
+{
+  "type": "analysis_update",
+  "analysis": {
+    "matched_policy_id": "...",
+    "matched_policy_title": "...",
+    "summary": "...",
+    "recommendation": "...",
+    "assignment_recommendation": "...",
+    "priority": "low | medium | high | urgent",
+    "flags": ["..."]
+  }
+}
+
+When asked to generate other outputs (emails, letters, etc.), return:
+{
+  "type": "text_output",
+  "content": "your generated text here"
+}
+
+When answering questions, return:
+{
+  "type": "message",
+  "content": "your answer here"
+}
+
+CONTEXT:
+
+Case: ${c.case_id} (${c.case_type})
+Status: ${c.status}
+Applicant: ${c.applicant.name}
+
+Current Analysis:
+${JSON.stringify(currentAnalysis, null, 2)}
+
+Full Case Record:
+${JSON.stringify(c, null, 2)}
+
+Applicable Policies:
+${JSON.stringify(matchedPolicies, null, 2)}
+
+Workflow State:
+${currentState ? JSON.stringify(currentState, null, 2) : 'Not found'}`
+
+  const messages = [
+    ...(conversationHistory || []).map(msg => ({
+      role: msg.role,
+      content: msg.content,
+    })),
+    { role: 'user' as const, content: userMessage },
+  ]
+
+  const model = process.env.ANTHROPIC_DEFAULT_OPUS_MODEL ?? 'claude-opus-4-6'
+
+  let message
+  try {
+    const stream = anthropic.messages.stream({
+      model,
+      max_tokens: 4096,
+      system: systemPrompt,
+      messages,
+    })
+    message = await stream.finalMessage()
+  } catch (err) {
+    console.error('[Claude API error in chat]', err)
+    res.status(502).json({
+      error: 'Claude API call failed.',
+      detail: err instanceof Error ? err.message : String(err),
+    })
+    return
+  }
+
+  const textBlock = message.content.find(b => b.type === 'text')
+  if (!textBlock || textBlock.type !== 'text') {
+    res.status(502).json({ error: 'No text content returned from Claude.' })
+    return
+  }
+
+  // Try to parse as JSON first
+  const jsonMatch = textBlock.text.match(/\{[\s\S]*}/)
+  if (jsonMatch) {
+    try {
+      const result = JSON.parse(jsonMatch[0])
+      console.log(`[/chat] Returning JSON response:`, result.type)
+      res.json(result)
+      return
+    } catch {
+      // Not valid JSON, fall through to plain text
+    }
+  }
+
+  console.log('[/chat] Returning plain text message')
+  res.json({
+    type: 'message',
+    content: textBlock.text,
+  })
+})
+
 // ─── Health check ─────────────────────────────────────────────────────────────
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))

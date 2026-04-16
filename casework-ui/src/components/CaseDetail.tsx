@@ -234,6 +234,9 @@ export default function CaseDetail({ currentCase: c, policies, workflow }: Props
             analysing={analysing}
             result={showAnalysis ? analysis : null}
             onAnalyse={handleAnalyse}
+            currentCase={c}
+            policies={policies}
+            workflow={workflow}
           />
         )}
       </div>

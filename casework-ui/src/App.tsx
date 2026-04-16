@@ -18,6 +18,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null)
   const [selectedCase, setSelectedCase] = useState<Case>(cases[0])
   const [view, setView] = useState<'dashboard' | 'case'>('dashboard')
+  const [caseAssignments, setCaseAssignments] = useState<Record<string, string>>({})
 
   if (!user) {
     return <Login onLogin={setUser} />
@@ -33,11 +34,29 @@ export default function App() {
     setView('dashboard')
   }
 
+  const handleAssignCase = (caseId: string, caseworkerId: string) => {
+    setCaseAssignments(prev => ({
+      ...prev,
+      [caseId]: caseworkerId,
+    }))
+  }
+
+  // Get cases with assignments applied
+  const casesWithAssignments = cases.map(c => ({
+    ...c,
+    assigned_caseworker: caseAssignments[c.case_id] || c.assigned_caseworker,
+  }))
+
+  // Filter cases for caseworkers - only show their assigned cases
+  const visibleCases = user.role === 'caseworker'
+    ? casesWithAssignments.filter(c => c.assigned_caseworker === user.id)
+    : casesWithAssignments
+
   // Applicant view
   if (user.role === 'applicant') {
     return (
       <div className="min-h-screen">
-        <ApplicantView cases={cases} user={user} />
+        <ApplicantView cases={casesWithAssignments} user={user} />
         <button
           onClick={handleLogout}
           className="fixed bottom-4 right-4 bg-govuk-grey-3 text-white text-sm px-4 py-2 rounded hover:bg-govuk-black transition-colors"
@@ -87,7 +106,7 @@ export default function App() {
           {/* Body below header */}
           <div className="flex w-full mt-14 overflow-hidden">
             <CaseList
-              cases={cases}
+              cases={visibleCases}
               selectedId={selectedCase.case_id}
               onSelect={setSelectedCase}
             />
@@ -111,6 +130,15 @@ export default function App() {
           <span className="text-white font-bold text-sm tracking-wide">
             Casework Decision Support
           </span>
+          <button
+            onClick={() => setView('case')}
+            className="text-govuk-grey-2 text-xs hover:text-white transition-colors flex items-center gap-1"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            View Cases
+          </button>
           <div className="ml-auto flex items-center gap-2">
             <span className="text-govuk-grey-2 text-xs">
               Signed in as: <span className="text-white">{user.name}</span>
@@ -129,8 +157,13 @@ export default function App() {
         </div>
 
         {/* Body below header */}
-        <div className="w-full mt-14 overflow-hidden">
-          <TeamLeaderDashboard cases={cases} user={user} onViewCase={handleViewCase} />
+        <div className="w-full mt-14 h-[calc(100vh-3.5rem)]">
+          <TeamLeaderDashboard 
+            cases={casesWithAssignments} 
+            user={user} 
+            onViewCase={handleViewCase}
+            onAssignCase={handleAssignCase}
+          />
         </div>
       </div>
     )
@@ -148,7 +181,7 @@ export default function App() {
           Casework Decision Support
         </span>
         <span className="text-govuk-grey-2 text-xs ml-2">
-          — {cases.length} active cases loaded
+          — {visibleCases.length} assigned cases
         </span>
         <div className="ml-auto flex items-center gap-2">
           <span className="text-govuk-grey-2 text-xs">
@@ -170,7 +203,7 @@ export default function App() {
       {/* Body below header */}
       <div className="flex w-full mt-14 overflow-hidden">
         <CaseList
-          cases={cases}
+          cases={visibleCases}
           selectedId={selectedCase.case_id}
           onSelect={setSelectedCase}
         />
