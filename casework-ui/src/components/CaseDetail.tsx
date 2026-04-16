@@ -788,12 +788,20 @@ function AnalysisTab({
             {PRIORITY_LABELS[result.priority]}
           </span>
         </div>
-        <div className="border border-gray-200 rounded p-3">
-          <div className="text-xs font-bold uppercase text-govuk-grey-3 mb-1">Matched Policy</div>
-          <div className="font-mono text-sm font-bold text-govuk-blue">{result.matched_policy_id}</div>
-          <div className="text-xs text-govuk-grey-3 truncate">{result.matched_policy_title}</div>
-        </div>
       </div>
+
+      {/* Matched Policies */}
+      <Section title="Matched Policies">
+        <div className="space-y-3">
+          {(result.matched_policies || []).map((policy, i) => (
+            <div key={i} className="border border-gray-200 rounded p-3 bg-white">
+              <div className="font-mono text-sm font-bold text-govuk-blue mb-1">{policy.policy_id}</div>
+              <div className="text-sm font-semibold text-govuk-black mb-1">{policy.title}</div>
+              <div className="text-xs text-govuk-grey-3">{policy.relevance}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
 
       {/* Summary */}
       <Section title="Case summary">

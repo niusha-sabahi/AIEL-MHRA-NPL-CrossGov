@@ -62,13 +62,21 @@ export interface WorkflowData {
 
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
 
+export interface MatchedPolicy {
+  policy_id: string
+  title: string
+  relevance: string // explanation of why this policy matches
+}
+
 export interface AnalysisResult {
-  matched_policy_id: string
-  matched_policy_title: string
+  matched_policies: MatchedPolicy[]
   recommendation: string
   assignment_recommendation: string
   priority: Priority
   summary: string
   flags: string[]
   _isMock?: boolean
+  // Legacy fields for backward compatibility
+  matched_policy_id?: string
+  matched_policy_title?: string
 }

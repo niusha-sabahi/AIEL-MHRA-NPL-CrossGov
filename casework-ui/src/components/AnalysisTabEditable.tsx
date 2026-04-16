@@ -49,8 +49,7 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
   
   // Editable fields - initialized from result
   const [editedPriority, setEditedPriority] = useState<Priority>('medium')
-  const [editedPolicyId, setEditedPolicyId] = useState('')
-  const [editedPolicyTitle, setEditedPolicyTitle] = useState('')
+  const [editedMatchedPolicies, setEditedMatchedPolicies] = useState<Array<{policy_id: string, title: string, relevance: string}>>([])
   const [editedSummary, setEditedSummary] = useState('')
   const [editedFlags, setEditedFlags] = useState<string[]>([])
   const [editedRecommendation, setEditedRecommendation] = useState('')
@@ -58,8 +57,7 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
   
   // Saved versions
   const [savedPriority, setSavedPriority] = useState<Priority>('medium')
-  const [savedPolicyId, setSavedPolicyId] = useState('')
-  const [savedPolicyTitle, setSavedPolicyTitle] = useState('')
+  const [savedMatchedPolicies, setSavedMatchedPolicies] = useState<Array<{policy_id: string, title: string, relevance: string}>>([])
   const [savedSummary, setSavedSummary] = useState('')
   const [savedFlags, setSavedFlags] = useState<string[]>([])
   const [savedRecommendation, setSavedRecommendation] = useState('')
@@ -67,8 +65,7 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
   
   // Original versions (immutable)
   const [originalPriority, setOriginalPriority] = useState<Priority>('medium')
-  const [originalPolicyId, setOriginalPolicyId] = useState('')
-  const [originalPolicyTitle, setOriginalPolicyTitle] = useState('')
+  const [originalMatchedPolicies, setOriginalMatchedPolicies] = useState<Array<{policy_id: string, title: string, relevance: string}>>([])
   const [originalSummary, setOriginalSummary] = useState('')
   const [originalFlags, setOriginalFlags] = useState<string[]>([])
   const [originalRecommendation, setOriginalRecommendation] = useState('')
@@ -77,25 +74,28 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
   // Update all fields when result changes
   useEffect(() => {
     if (result) {
+      const policies = result.matched_policies || (result.matched_policy_id ? [{
+        policy_id: result.matched_policy_id,
+        title: result.matched_policy_title || '',
+        relevance: 'Legacy format - no relevance provided'
+      }] : [])
+
       setEditedPriority(result.priority)
-      setEditedPolicyId(result.matched_policy_id)
-      setEditedPolicyTitle(result.matched_policy_title)
+      setEditedMatchedPolicies(policies)
       setEditedSummary(result.summary)
       setEditedFlags(result.flags)
       setEditedRecommendation(result.recommendation)
       setEditedAssignment(result.assignment_recommendation)
 
       setSavedPriority(result.priority)
-      setSavedPolicyId(result.matched_policy_id)
-      setSavedPolicyTitle(result.matched_policy_title)
+      setSavedMatchedPolicies(policies)
       setSavedSummary(result.summary)
       setSavedFlags(result.flags)
       setSavedRecommendation(result.recommendation)
       setSavedAssignment(result.assignment_recommendation)
 
       setOriginalPriority(result.priority)
-      setOriginalPolicyId(result.matched_policy_id)
-      setOriginalPolicyTitle(result.matched_policy_title)
+      setOriginalMatchedPolicies(policies)
       setOriginalSummary(result.summary)
       setOriginalFlags(result.flags)
       setOriginalRecommendation(result.recommendation)
@@ -121,8 +121,7 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
 
   function handleSaveEdit() {
     setSavedPriority(editedPriority)
-    setSavedPolicyId(editedPolicyId)
-    setSavedPolicyTitle(editedPolicyTitle)
+    setSavedMatchedPolicies(editedMatchedPolicies)
     setSavedSummary(editedSummary)
     setSavedFlags(editedFlags)
     setSavedRecommendation(editedRecommendation)
@@ -133,16 +132,14 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
 
   function handleRevertToOriginal() {
     setEditedPriority(originalPriority)
-    setEditedPolicyId(originalPolicyId)
-    setEditedPolicyTitle(originalPolicyTitle)
+    setEditedMatchedPolicies(originalMatchedPolicies)
     setEditedSummary(originalSummary)
     setEditedFlags(originalFlags)
     setEditedRecommendation(originalRecommendation)
     setEditedAssignment(originalAssignment)
 
     setSavedPriority(originalPriority)
-    setSavedPolicyId(originalPolicyId)
-    setSavedPolicyTitle(originalPolicyTitle)
+    setSavedMatchedPolicies(originalMatchedPolicies)
     setSavedSummary(originalSummary)
     setSavedFlags(originalFlags)
     setSavedRecommendation(originalRecommendation)
@@ -153,8 +150,7 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
 
   function handleCancelEdit() {
     setEditedPriority(savedPriority)
-    setEditedPolicyId(savedPolicyId)
-    setEditedPolicyTitle(savedPolicyTitle)
+    setEditedMatchedPolicies(savedMatchedPolicies)
     setEditedSummary(savedSummary)
     setEditedFlags(savedFlags)
     setEditedRecommendation(savedRecommendation)
@@ -198,8 +194,7 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
           policies,
           workflow,
           currentAnalysis: {
-            matched_policy_id: savedPolicyId,
-            matched_policy_title: savedPolicyTitle,
+            matched_policies: savedMatchedPolicies,
             summary: savedSummary,
             recommendation: savedRecommendation,
             assignment_recommendation: savedAssignment,
@@ -221,17 +216,17 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
       if (data.type === 'analysis_update' && data.analysis) {
         // Update the analysis fields
         const analysis = data.analysis
+        const policies = analysis.matched_policies || []
+        
         setEditedPriority(analysis.priority)
-        setEditedPolicyId(analysis.matched_policy_id)
-        setEditedPolicyTitle(analysis.matched_policy_title)
+        setEditedMatchedPolicies(policies)
         setEditedSummary(analysis.summary)
         setEditedFlags(analysis.flags)
         setEditedRecommendation(analysis.recommendation)
         setEditedAssignment(analysis.assignment_recommendation)
 
         setSavedPriority(analysis.priority)
-        setSavedPolicyId(analysis.matched_policy_id)
-        setSavedPolicyTitle(analysis.matched_policy_title)
+        setSavedMatchedPolicies(policies)
         setSavedSummary(analysis.summary)
         setSavedFlags(analysis.flags)
         setSavedRecommendation(analysis.recommendation)
@@ -264,8 +259,7 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
 
   const wasEdited = 
     savedPriority !== originalPriority ||
-    savedPolicyId !== originalPolicyId ||
-    savedPolicyTitle !== originalPolicyTitle ||
+    JSON.stringify(savedMatchedPolicies) !== JSON.stringify(originalMatchedPolicies) ||
     savedSummary !== originalSummary ||
     JSON.stringify(savedFlags) !== JSON.stringify(originalFlags) ||
     savedRecommendation !== originalRecommendation ||
@@ -369,12 +363,19 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
               {PRIORITY_LABELS[savedPriority]}
             </span>
           </div>
-          <div className="border border-gray-200 rounded p-3">
-            <div className="text-xs font-bold uppercase text-govuk-grey-3 mb-1">Matched Policy</div>
-            <div className="font-mono text-sm font-bold text-govuk-blue">{savedPolicyId}</div>
-            <div className="text-xs text-govuk-grey-3 truncate">{savedPolicyTitle}</div>
-          </div>
         </div>
+
+        <Section title="Matched Policies">
+          <div className="space-y-3">
+            {savedMatchedPolicies.map((policy, i) => (
+              <div key={i} className="border border-gray-200 rounded p-3 bg-white">
+                <div className="font-mono text-sm font-bold text-govuk-blue mb-1">{policy.policy_id}</div>
+                <div className="text-sm font-semibold text-govuk-black mb-1">{policy.title}</div>
+                <div className="text-xs text-govuk-grey-3">{policy.relevance}</div>
+              </div>
+            ))}
+          </div>
+        </Section>
 
         <Section title="Case summary">
           <p className="text-sm text-govuk-black leading-relaxed bg-govuk-grey-1 rounded border border-gray-200 p-4">
@@ -467,23 +468,67 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
               <option value="urgent">Urgent</option>
             </select>
           </div>
-          <div className="border border-govuk-blue rounded p-3 bg-white">
-            <label className="text-xs font-bold uppercase text-govuk-grey-3 mb-2 block">Matched Policy ID</label>
-            <input
-              type="text"
-              value={editedPolicyId}
-              onChange={e => setEditedPolicyId(e.target.value)}
-              className="w-full text-sm font-mono border border-gray-300 rounded px-2 py-1.5 focus:outline-none focus:border-govuk-blue mb-1"
-            />
-            <input
-              type="text"
-              value={editedPolicyTitle}
-              onChange={e => setEditedPolicyTitle(e.target.value)}
-              placeholder="Policy title"
-              className="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-govuk-blue"
-            />
-          </div>
         </div>
+
+        <Section title="Matched Policies">
+          <div className="space-y-3">
+            {editedMatchedPolicies.map((policy, i) => (
+              <div key={i} className="border-2 border-govuk-blue rounded p-3 bg-white">
+                <div className="flex gap-2 mb-2">
+                  <select
+                    value={policy.policy_id}
+                    onChange={e => {
+                      const selectedPolicy = policies.find(p => p.policy_id === e.target.value)
+                      if (selectedPolicy) {
+                        const newPolicies = [...editedMatchedPolicies]
+                        newPolicies[i] = { 
+                          policy_id: selectedPolicy.policy_id,
+                          title: selectedPolicy.title,
+                          relevance: newPolicies[i].relevance || 'Manually added policy'
+                        }
+                        setEditedMatchedPolicies(newPolicies)
+                      }
+                    }}
+                    className="flex-1 text-sm font-mono border border-gray-300 rounded px-2 py-1.5 focus:outline-none focus:border-govuk-blue"
+                  >
+                    <option value="">Select a policy...</option>
+                    {policies.map(p => (
+                      <option key={p.policy_id} value={p.policy_id}>
+                        {p.policy_id} - {p.title}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => setEditedMatchedPolicies(editedMatchedPolicies.filter((_, idx) => idx !== i))}
+                    className="text-red-600 hover:text-red-800 px-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="text-sm font-semibold text-govuk-black mb-2 px-2">
+                  {policy.title || 'No policy selected'}
+                </div>
+                <textarea
+                  value={policy.relevance}
+                  onChange={e => {
+                    const newPolicies = [...editedMatchedPolicies]
+                    newPolicies[i] = { ...newPolicies[i], relevance: e.target.value }
+                    setEditedMatchedPolicies(newPolicies)
+                  }}
+                  placeholder="Why this policy is relevant"
+                  rows={2}
+                  className="w-full text-xs border border-gray-300 rounded px-2 py-1.5 resize-none focus:outline-none focus:border-govuk-blue"
+                />
+              </div>
+            ))}
+            <button
+              onClick={() => setEditedMatchedPolicies([...editedMatchedPolicies, { policy_id: '', title: '', relevance: '' }])}
+              className="text-sm text-govuk-blue hover:underline flex items-center gap-1"
+            >
+              <span>+</span> Add policy
+            </button>
+          </div>
+        </Section>
 
         <Section title="Case summary">
           <textarea
@@ -700,12 +745,19 @@ export default function AnalysisTabEditable({ analysing, result, onAnalyse, curr
             {PRIORITY_LABELS[savedPriority]}
           </span>
         </div>
-        <div className="border border-gray-200 rounded p-3">
-          <div className="text-xs font-bold uppercase text-govuk-grey-3 mb-1">Matched Policy</div>
-          <div className="font-mono text-sm font-bold text-govuk-blue">{savedPolicyId}</div>
-          <div className="text-xs text-govuk-grey-3 truncate">{savedPolicyTitle}</div>
-        </div>
       </div>
+
+      <Section title="Matched Policies">
+        <div className="space-y-3">
+          {savedMatchedPolicies.map((policy, i) => (
+            <div key={i} className="border border-gray-200 rounded p-3 bg-white">
+              <div className="font-mono text-sm font-bold text-govuk-blue mb-1">{policy.policy_id}</div>
+              <div className="text-sm font-semibold text-govuk-black mb-1">{policy.title}</div>
+              <div className="text-xs text-govuk-grey-3">{policy.relevance}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
 
       <Section title="Case summary">
         <p className="text-sm text-govuk-black leading-relaxed bg-govuk-grey-1 rounded border border-gray-200 p-4">

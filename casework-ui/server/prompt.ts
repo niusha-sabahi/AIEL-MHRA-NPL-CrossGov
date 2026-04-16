@@ -18,7 +18,7 @@ to act on it right now. Be concise and direct — write as if briefing a colleag
 who has two minutes before a team call.
 
 Rules:
-- Identify the single most relevant policy for the case's current situation.
+- Identify ALL relevant policies that apply to this case, explaining why each one matters.
 - State the recommended action in plain English (no jargon, no bullet soup).
 - Flag only genuine risks: missed deadlines, escalation thresholds breached,
   evidence gaps, or procedural requirements not yet met.
@@ -60,8 +60,13 @@ ${deadlineContext}
 
 Return this JSON object (no markdown, no preamble, just valid JSON):
 {
-  "matched_policy_id": "<policy ID most relevant to the current situation>",
-  "matched_policy_title": "<that policy's title>",
+  "matched_policies": [
+    {
+      "policy_id": "<policy ID>",
+      "title": "<policy title>",
+      "relevance": "<brief explanation of why this policy applies to this case>"
+    }
+  ],
   "summary": "<2–3 sentences: what has happened, where the case stands, what is at stake>",
   "recommendation": "<one clear action the caseworker should take now, with brief justification>",
   "assignment_recommendation": "<who should own this and why>",

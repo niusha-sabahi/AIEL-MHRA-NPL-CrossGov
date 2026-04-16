@@ -46,8 +46,13 @@ export async function analyseCase(c: Case): Promise<AnalysisResult> {
 
 function buildFallbackMock(c: Case): AnalysisResult {
   return {
-    matched_policy_id: 'N/A',
-    matched_policy_title: 'Server offline — mock response',
+    matched_policies: [
+      {
+        policy_id: 'N/A',
+        title: 'Server offline — mock response',
+        relevance: 'This is a placeholder. Start the AI server to get real policy matches.',
+      },
+    ],
     summary: `This is a placeholder analysis for ${c.case_id}. Start the AI server with "npm run server" to get a real Claude-generated analysis.`,
     recommendation: 'Start the analysis server (npm run server) and click Analyse Case again.',
     assignment_recommendation: `Currently assigned to ${c.assigned_to.replace(/_/g, ' ')}.`,
